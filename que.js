@@ -198,7 +198,7 @@ class Watcher {
     this.callback = callback
     this.id = ++Watcher.id
 
-    this.compute = Expression.parse(expr)
+    this.compute = Parser.buildFunction(expr)
     this.update()
   }
 
@@ -318,7 +318,7 @@ Directive.event = {
 
     // Binding data attribute
     if (this.node.hasAttribute('data')) {
-      data = Expression.parse(this.node.getAttribute('data'))(scope)
+      data = Parser.compute(this.node.getAttribute('data'), scope)
     }
 
     // Binding event function
@@ -436,7 +436,7 @@ class Compiler {
   }
 
   compile(node, scope) {
-    if (node.nodeType === 1) {
+    if (node.nodeType === 1 && node.tagName != 'SCRIPT') {
       this.compileElementNode(node, scope)
     } else
     if (node.nodeType === 11) {
@@ -477,7 +477,7 @@ class Compiler {
   compileTextNode(node, scope) {
     const text = node.wholeText.trim()
     if (text) {
-      const expr = Compiler.parseText(text)
+      const expr = Parser.parseMustache(text)
       if (expr) {
         this.createDirective(node, scope, {
           type: 'text',
@@ -535,7 +535,7 @@ class Compiler {
         expr: attr.value,
       }
     }
-    const expr = Compiler.parseText(attr.value)
+    const expr = Parser.parseMustache(attr.value)
     if (expr) {
       return {
         type: 'attr',
@@ -545,17 +545,23 @@ class Compiler {
     }
   }
 
+}
+
+/* --------------------------------------------------------
+ * Expression Parser Class
+ * ----------------------------------------------------- */
+
+class Parser {
+
   /**
-   * Parse expression to constant and variable formula:
+   * Parse expression with mustache syntax to constant and variable formula:
    * 'a {{b+"text"}} c {{d+Math.PI}}' => '"a " + b + "text" + " c" + d + Math.PI'
    */
-  static parseText(text) {
-    const regText = /\{\{(.+?)\}\}/g
-    const matches = text.match(regText)
-
+  static parseMustache(text) {
+    const matches = text.match(this.regMustache)
     if (matches) {
       const tokens = []
-      const pieces = text.split(regText)
+      const pieces = text.split(this.regMustache)
 
       pieces.forEach(piece => {
         if (matches.indexOf('{{' + piece + '}}') > -1) {
@@ -568,31 +574,20 @@ class Compiler {
     }
   }
 
-}
-
-/* --------------------------------------------------------
- * Expression Class
- * ----------------------------------------------------- */
-
-const EXPR_CACHE = {}
-const SIMPLE_REG = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
-const KEYWORD_REG = /^(?:true|false|null|undefined|Infinity|NaN)$/
-const QUOTE_REG = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g
-const IDENT_REG = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
-
-class Expression {
+  static compute(expr, scope) {
+    return this.buildFunction(expr)(scope)
+  }
 
   /**
    * Parse expression and return executable function
    * For complex expression, it seems 'eval' more simpler,
    * but strict mode not Supported 'with' keyword
    */
-  static parse(expr) {
-    let fn = EXPR_CACHE[expr]
+  static buildFunction(expr) {
+    let fn = this.cache[expr]
     if (!fn) {
-      let body = this.isSimple(expr) ? 'scope.' + expr : this.parseComplex(expr)
-      fn = new Function('scope', 'return ' + body + ';')
-      EXPR_CACHE[expr] = fn // 表达式缓存能极大程度上提升性能
+      let body = this.isSimple(expr) ? 'vm.' + expr : this.parseComplex(expr)
+      fn = this.cache[expr] = new Function('vm', 'return ' + body)
     }
     return fn
   }
@@ -601,18 +596,18 @@ class Expression {
    * Simple expression like 'a.b', it can parse to 'scope.a.b'
    */
   static isSimple(expr) {
-    return SIMPLE_REG.test(expr) && !KEYWORD_REG.test(expr)
+    return this.regSimple.test(expr) && !this.regKeyword.test(expr)
   }
 
   /**
    * Complex expression like 'a.b + a.c', it will parse to 'scope.a.b + scope.a.c'
    */
   static parseComplex(expr) {
-    let strCache = []
+    const strCache = []
 
     // Extract the characters in quotation and replace them with ordinal numbers
     // and cache them
-    expr = expr.replace(QUOTE_REG, ($) => {
+    expr = expr.replace(this.regQuote, $ => {
       let i = strCache.length
       strCache[i] = $
       return '"' + i + '"'
@@ -622,10 +617,10 @@ class Expression {
     expr = expr.replace(/\s/g, '')
 
     // Extract words and replace them with variable forms
-    expr = (' ' + expr).replace(IDENT_REG, ($) => {
+    expr = (' ' + expr).replace(this.regIdent, $ => {
       let begin = $.charAt(0)
       let path = $.slice(1)
-      return KEYWORD_REG.test(path) ? $ : begin + 'scope.' + path
+      return this.regKeyword.test(path) ? $ : begin + 'vm.' + path
     })
 
     // Replace the characters in quotation with ordinal numbers
@@ -636,12 +631,19 @@ class Expression {
   }
 }
 
+Parser.cache = {} // Cache is necessary!
+Parser.regMustache = /\{\{(.+?)\}\}/g
+Parser.regSimple = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
+Parser.regKeyword = /^(?:true|false|null|undefined|Infinity|NaN|Math)$/
+Parser.regQuote = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g
+Parser.regIdent = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
+
 /* ------------------------------------------------------
  * DOM Elements prototype extensions
  * Copyright (c) 2018 Cloudseat.net
  * Released under the MIT License.
  * --------------------------------------------------- */
-
+;
 [Element, Text, DocumentFragment].forEach(e => {
   Object.assign(e.prototype, {
     insert(node) {
