@@ -20,12 +20,12 @@ class Que {
     const proxy = this._proxy(options)
     new Observer(options.data)
 
-    document.onreadystatechange = function() {
+    document.addEventListener('readystatechange', function() {
       if (this.readyState === 'complete') {
         new Compiler(document.body, proxy)
         proxy.ready && proxy.ready(decodeURI(location.pathname), location.search.slice(1))
       }
-    }
+    })
   }
 
   /**
@@ -82,6 +82,8 @@ class Observer {
       set: newValue => {
         if (value !== newValue) {
           value = newValue
+          // BUG: The follow line code will cause a problem when 'this.xxx = this.yyy'
+          // You must use this: this.xxx = Object.create(this.yyy)
           this.observeRecursive(value, dep)
           dep.notify()
         }
@@ -313,20 +315,11 @@ Directive.model = {
 
 Directive.event = {
   init() {
-    let scope = this.scope
-    let data = null
-
-    // Binding data attribute
-    if (this.node.hasAttribute('data')) {
-      data = Parser.compute(this.node.getAttribute('data'), scope)
-    }
-
-    // Binding event function
     this.node.removeAttribute('@' + this.name)
-    const method = scope[this.fn]
+    const method = this.scope[this.fn]
     if (typeof method === 'function') {
       this.node.addEventListener(this.name, e => {
-        method && method.call(scope, e, data)
+        method && method.call(this.scope, e)
       })
     }
   }
