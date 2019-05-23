@@ -20,11 +20,9 @@ class Que {
     const proxy = this._proxy(options)
     new Observer(options.data)
 
-    document.addEventListener('readystatechange', function() {
-      if (this.readyState === 'complete') {
-        new Compiler(document.body, proxy)
-        proxy.ready && proxy.ready(decodeURI(location.pathname), location.search.slice(1))
-      }
+    document.addEventListener('DOMContentLoaded', function() {
+      new Compiler(document.body, proxy)
+      proxy.ready && proxy.ready(decodeURI(location.pathname), location.search.slice(1))
     })
   }
 
