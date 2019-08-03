@@ -41,6 +41,80 @@ class Que {
 }
 
 /* --------------------------------------------------------
+ * Static http request functions
+ * ----------------------------------------------------- */
+
+Que.get = function(options) {
+  options.method = 'GET'
+  return this.request(options)
+}
+
+Que.post = function(options) {
+  options.method = 'POST'
+  return this.request(options)
+}
+
+Que.put = function(options) {
+  options.method = 'PUT'
+  return this.request(options)
+}
+
+Que.delete = function(options) {
+  options.method = 'DELETE'
+  return this.request(options)
+}
+
+Que.request = function(options) {
+  const config = {
+    url: './',
+    data: null,
+    method: 'GET',
+    async: true,
+    withCredentials: false,
+    contentType: 'application/json',
+    timeout: 60 * 1000,
+    headers: {},
+    onerror: function() {},
+    onabort: function() {},
+    ontimeout: function() {},
+    success: function() {},
+    fail: function() {},
+  }
+
+  // Assign options
+  const xhr = new XMLHttpRequest()
+  Object.assign(config, options)
+
+  // Open request
+  xhr.open(config.method, config.url, config.async)
+  xhr.timeout = config.timeout
+  xhr.withCredentials = config.withCredentials
+
+  // Set request headers
+  xhr.setRequestHeader('Content-Type', config.contentType)
+  for (let key in config.headers) {
+    if (config.headers.hasOwnProperty(key)) {
+      xhr.setRequestHeader(key, config.headers[key])
+    }
+  }
+
+  // Handle response
+  xhr.onload = function() {
+    if (this.status === 200) {
+      let res = JSON.parse(this.responseText)
+      if (res && res.hasOwnProperty('errcode')) {
+        config.fail(res)
+      } else {
+        config.success(res)
+      }
+    }
+  }
+
+  // Send request
+  xhr.send(config.data)
+}
+
+/* --------------------------------------------------------
  * Observer Class
  * ----------------------------------------------------- */
 
