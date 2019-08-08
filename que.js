@@ -343,7 +343,12 @@ Directive.text = {
 
 Directive.attr = {
   update(value) {
-    this.node.setAttribute(this.name, value)
+    if (this.name == 'data-src') {
+      this.node.removeAttribute('data-src')
+      this.node.setAttribute('src', value)
+    } else {
+      this.node.setAttribute(this.name, value)
+    }
   }
 }
 
