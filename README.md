@@ -43,7 +43,7 @@ Que.js支持七种常用指令，除Text和Attribute以外，其他指令的表�
 
 ### 三. 它是如何运行的
 物以类聚，整个que.js包含七个独立的类，完全可以分别形成文件。类之间的运行关系如下：
-![UML](https://raw.githubusercontent.com/lottime/que.js/master/uml.png)
+![UML](https://raw.githubusercontent.com/someworks/que.js/master/uml.png)
 
 ### 四. 兼容性怎么样
 不怎么样。因大量使用ES6语法，且仅在Chrome上进行过测试，所以，估计，那些不够现代的浏览器无法使用。
