@@ -70,7 +70,7 @@ Que.request = function(options) {
     data: null,
     method: 'GET',
     async: true,
-    withCredentials: false,
+    withCredentials: true,
     contentType: 'application/json',
     timeout: 60 * 1000,
     headers: {},
@@ -101,7 +101,7 @@ Que.request = function(options) {
   // Handle response
   xhr.onload = function() {
     if (this.status === 200) {
-      let res = JSON.parse(this.responseText)
+      let res = Que.parseJson(this.responseText)
       if (res && res.hasOwnProperty('errcode')) {
         config.fail(res)
       } else {
@@ -111,7 +111,22 @@ Que.request = function(options) {
   }
 
   // Send request
+  if (Que.isJson(config.data)) {
+    config.data = JSON.stringify(config.data)
+  }
   xhr.send(config.data)
+}
+
+Que.isJson = function(obj) {
+  return typeof obj == 'object' && Object.prototype.toString.call(obj).toLowerCase() == '[object object]' && !obj.length
+}
+
+Que.parseJson = function(text) {
+  try {
+    return JSON.parse(text)
+  } catch(e) {
+    return text
+  }
 }
 
 /* --------------------------------------------------------
