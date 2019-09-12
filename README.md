@@ -51,6 +51,7 @@ Que.js支持七种常用指令，除Text和Attribute以外，其他指令的表�
 ```
 
 8. Image
+
 为防止 img 标签直接使用 src 属性产生 404 错误，可改用 data-src
 ```html
 <img data-src="{{imagesrc}}"/>
