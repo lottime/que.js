@@ -74,7 +74,6 @@ Que.request = function(options) {
     contentType: 'application/json',
     timeout: 60 * 1000,
     headers: {},
-    onerror: function() {},
     onabort: function() {},
     ontimeout: function() {},
     success: function() {},
@@ -89,6 +88,7 @@ Que.request = function(options) {
   xhr.open(config.method, config.url, config.async)
   xhr.timeout = config.timeout
   xhr.withCredentials = config.withCredentials
+  xhr.onerror = config.fail
 
   // Set request headers
   xhr.setRequestHeader('Content-Type', config.contentType)
