@@ -24,6 +24,9 @@ class Que {
       new Compiler(document.body, proxy)
       proxy.ready && proxy.ready(decodeURI(location.pathname), location.search.slice(1))
     })
+    document.addEventListener('deviceready', () => {
+      proxy.onDeviceReady && proxy.onDeviceReady()
+    }, false)
   }
 
   /**
@@ -127,6 +130,11 @@ Que.parseJson = function(text) {
   } catch(e) {
     return text
   }
+}
+
+Que.customEvents = {}
+Que.directive = function(event, binding) {
+  Que.customEvents[event] = binding
 }
 
 /* --------------------------------------------------------
@@ -407,12 +415,21 @@ Directive.model = {
 
 Directive.event = {
   init() {
-    this.node.removeAttribute('@' + this.name)
     const method = this.scope[this.fn]
+    this.node.removeAttribute('@' + this.name)
+
     if (typeof method === 'function') {
-      this.node.addEventListener(this.name, e => {
-        method && method.call(this.scope, e)
-      })
+      const binding = Que.customEvents[this.name]
+      if (binding) {
+        binding(this.node, e => {
+          e.currentTarget = this.node
+          method.call(this.scope, e)
+        })
+      } else {
+        this.node.addEventListener(this.name, e => {
+          method.call(this.scope, e)
+        })
+      }
     }
   }
 }
