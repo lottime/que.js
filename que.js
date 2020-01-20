@@ -225,7 +225,7 @@ class Observer {
               break
             case 'splice':
               if (arguments.length > 2) {
-                inserted = arguments.slice(2)
+                inserted = Array.prototype.slice.call(arguments, 2)
               }
               break
           }
@@ -398,13 +398,21 @@ Directive.model = {
   init() {
     this.node.removeAttribute(this.name)
     this.node.addEventListener('input', e => {
+      // 由于eval语句双向设置value时会再次触发update方法更新文本框内容
+      // 造成光标自动跳到末尾，故增加标志位用于判断更新来源
+      this.node.isInputing = true
       // CAN NOT ASSIGN BY '[]' MODE
       // this.scope[this.expr] = e.currentTarget.value
       eval('this.scope.' + this.expr + '=e.currentTarget.value')
     })
+    this.node.addEventListener('blur', e => {
+      this.node.isInputing = false
+    })
   },
 
   update(value) {
+    // 如果由input监听触发则不重复更新文本框内容（input本身即由用户手动更新）
+    if (!this.node.isInputing)
     this.node.value = value
   }
 }
