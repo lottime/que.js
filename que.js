@@ -104,12 +104,10 @@ Que.request = function(options) {
   // Handle response
   xhr.onload = function() {
     if (this.status === 200) {
-      let res = Que.parseJson(this.responseText)
-      if (res && res.hasOwnProperty('errcode')) {
-        config.fail(res)
-      } else {
-        config.success(res)
-      }
+      let res = Que.parseJson(this.response)
+      config.success(res)
+    } else {
+      config.fail(res, this.status)
     }
   }
 
