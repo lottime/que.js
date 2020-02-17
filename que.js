@@ -103,8 +103,8 @@ Que.request = function(options) {
 
   // Handle response
   xhr.onload = function() {
+    let res = Que.parseJson(this.response)
     if (this.status === 200) {
-      let res = Que.parseJson(this.response)
       config.success(res)
     } else {
       config.fail(res, this.status)
