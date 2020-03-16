@@ -73,7 +73,7 @@ Que.request = function(options) {
     data: null,
     method: 'GET',
     async: true,
-    withCredentials: true,
+    withCredentials: false,
     contentType: 'application/json',
     timeout: 60 * 1000,
     headers: {},
