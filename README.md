@@ -71,7 +71,7 @@ Que.js 支持七种常用指令，除 Text 和 Attribute 以外，其他指令�
 
 ### 1. 引入框架
 ```html
-<script src="//cdn.jsdelivr.net/gh/seatwork/que.js/que.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/seatwork/que.js/lib/que.min.js"></script>
 ```
 
 ### 2. 编写 HTML
