@@ -11,7 +11,18 @@
 </head>
 <body>
 <div id="app">Loading...</div>
-<script>$docsify={coverpage:true}</script>
+<script>
+$docsify = {
+  coverpage: true,
+  plugins: [
+    function(hook) {
+      hook.afterEach(function(html) {
+        return html + '<hr/><footer>&copy;2019-2020, Developed and Maintained by <a href="https://github.com/seatwork">Seatwork</a></footer>'
+      })
+    }
+  ]
+}
+</script>
 <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.js"></script>
 </body>
 </html>
