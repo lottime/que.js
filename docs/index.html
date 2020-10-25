@@ -6,14 +6,18 @@
   <meta name="description" content="A Tiny, Handy and Simple JS Framework"/>
   <link rel="icon" href="favicon.ico"/>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css">
-  <link rel="stylesheet" href="_assets/override.css"/>
+  <link rel="stylesheet" href="assets/override.css"/>
   <title>Que.js</title>
 </head>
 <body>
 <div id="app">Loading...</div>
 <script>
 $docsify = {
-  coverpage: true,
+  coverpage: 'COVER.md',
+  homepage: 'https://unpkg.net/seatwork/que.js/README.md',
+  logo: 'assets/logo.svg',
+  repo: 'seatwork/que.js',
+  topMargin: 20,
   plugins: [
     function(hook) {
       hook.afterEach(function(html) {

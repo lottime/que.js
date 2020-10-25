@@ -61,7 +61,7 @@ Que.js 支持七种常用指令，除 Text 和 Attribute 以外，其他指令�
 ## 三. 它是如何运行的
 
 物以类聚，整个 que.js 包含七个独立的类，完全可以分别形成文件。类之间的运行关系如下：
-![UML](_assets/uml.png)
+![UML](https://seatwork.github.io/que.js/assets/uml.png)
 
 ## 四. 兼容性怎么样
 
@@ -71,32 +71,40 @@ Que.js 支持七种常用指令，除 Text 和 Attribute 以外，其他指令�
 
 ### 1. 引入框架
 ```html
-<script src="//cdn.jsdelivr.net/gh/seatwork/que.js/lib/que.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/seatwork/que.js/que.min.js"></script>
 ```
 
 ### 2. 编写 HTML
 ```html
-<div foreach="(item, index) in list">
-  <li>{{index + 1}}</li>
-  <li @click="add">{{item.name}}</li>
-</div>
+<h1>{{title}}</h1>
+<ul>
+  <li foreach="(user, index) in users">
+    <b>{{index+1}}</b> - <span>{{user.name}}</span>: <span>{{user.age}}</span>
+    <span if="user.sex==1">male</span>
+    <span else>female</span>
+  </li>
+</ul>
+<button @click="change">change</button>
 ```
 
 ### 3. 编写 Javascript
 ```js
 new Que({
   data: {
-    list: []
+    title: 'No Title',
+    users: []
   },
-  // 该方法自动在DOM加载完成后执行
   ready() {
-    this.list = [
-      {name: 111}
+    this.users = [
+      { name:'lucy', age:23, sex:0 },
+      { name:'john', age:28, sex:1 },
+      { name:'jack', age:25, sex:1 },
     ]
   },
-  add() {
-    this.list.push({
-      name: 222
+  change() {
+    this.title = 'User List'
+    this.users.push({
+      name: 'rose', age: 99, sex:0
     })
   }
 })
