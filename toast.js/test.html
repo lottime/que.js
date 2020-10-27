@@ -4,13 +4,12 @@
   <meta name="format-detection" content="telephone=no"/>
   <meta name="msapplication-tap-highlight" content="no"/>
   <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover"/>
-  <script src="toast.js/toast2.js"></script>
+  <script src="toast.js"></script>
   <title>toast</title>
-  <style type="text/css">button{line-height: 2;font-size:20px;}</style>
 </head>
 <body>
 
-<br/><br/><br/>
+<br/>
 <button onclick="testinfo()">info</button>
 <button onclick="testerror()">error</button>
 <button onclick="testsucc()">success</button>
@@ -23,13 +22,28 @@
 <button onclick="testloading()">loading start</button>
 <button onclick="testloadingdone()" toast-title="dsjlkfdsajl">loading done</button>
 <button onclick="testprogresstick()" toast-title="JFK老师的就立刻范德萨">progress tick</button>
+<button onclick="testslidingpage()">sliding page</button>
+
+<div id="page" onclick="closepage()">
+  <div>fdsafs fjkldsa</div>
+  <div>fdsafs fjkldsa</div>
+  <div>fdsafs fjkldsa</div>
+</div>
 
 <script>
+const page = Toast.slidingPage('#page')
+
 let p = 0
 Toast.progress.start(false)
 function testprogresstick() {
   p += 10
   Toast.progress.tick(p)
+}
+function testslidingpage() {
+  page.show()
+}
+function closepage() {
+  page.hide()
 }
 
 function testloading() {
@@ -72,10 +86,10 @@ function testaction() {
 }
 
 function testerror() {
-  Toast.error('hello world 蜘蛛侠转码48.230结束，实际显示大于该大于该时长', 30000)
+  Toast.error('hello world 蜘蛛侠转码48.230结束，实际显示大于该大于该时长', 3000)
 }
 function testsucc() {
-  Toast.success('hello world 蜘蛛侠转码48..230结束，实际显示大于该时长', 30000)
+  Toast.success('hello world 蜘蛛侠转码48..230结束，实际显示大于该时长', 1000)
 }
 function testalert() {
   Toast.alert('蜘蛛侠转码该时长蜘，实际显示大于该时长蜘蛛侠转码')

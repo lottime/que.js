@@ -8,6 +8,11 @@ A lightweight UI framework for toast componets.
 
 ## Simple Usage
 
+- **Tips**
+```
+<div toast-title="hello world"></div>
+```
+
 - **Message**
 ```
 Toast.info('hello world')
@@ -19,7 +24,15 @@ Toast.success('hello world')
 ```
 Toast.progress.start()
 setTimeout(() => {
-  Toast.progress.doen()
+  Toast.progress.done()
+}, 3000)
+```
+
+- **Loading**
+```
+Toast.loading.start()
+setTimeout(() => {
+  Toast.loading.done()
 }, 3000)
 ```
 
@@ -54,4 +67,11 @@ const sheet = Toast.actionSheet([
   { label: 'Menu Three', onClick: () => alert(3) },
 ])
 sheet.hide()
+```
+
+- **Sliding Page**
+```
+const page = Toast.slidingPage('#container-id')
+page.show()
+page.hide()
 ```
