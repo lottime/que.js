@@ -1,33 +1,35 @@
 class Heatmap {
-    constructor(selector, options = {}) {
-        this.options = this.merge(Heatmap.DEFAULT_OPTIONS, options)
+    constructor(options = {}) {
+        this.options = __merge(Heatmap.DEFAULT_OPTIONS, options)
         this.spacing = this.options.lattice.size + this.options.lattice.spacing
 
-        this.svg = this.createElement('svg')
-        this.svg.styles(Heatmap.DEFAULT_STYLES.svg)
+        this.svg = new Element('svg', {
+            xmlns: 'http://www.w3.org/2000/svg',
+            style: Heatmap.DEFAULT_STYLES.svg
+        })
+
         this.buildWeeks()
         this.buildDates()
-
-        document.querySelector(selector).appendChild(this.svg.attrs({
+        this.svg.setAttribute({
             width: this.canvasWidth,
             height: this.spacing * 8
-        }))
+        })
     }
 
     buildWeeks() {
         const days = this.options.lang.days
         if (!Array.isArray(days)) {
-            throw new Error('`days` must be an array')
+            throw new Error('lang["days"] must be an array')
         }
         this.weekWidth = 0
         days.forEach((w, i) => {
             this.weekWidth = Math.max(this.weekWidth, (w.length - 1) * 5)
-            let text = this.createElement('text', {
+            let text = new Element('text', {
                 x: 0,
-                y: (i + 1) * this.spacing + Heatmap.HEADER_HEIGHT
+                y: Heatmap.HEADER_HEIGHT + (i + 1) * this.spacing
             })
-            text.innerHTML = w
-            this.svg.appendChild(text)
+            text.setText(w)
+            this.svg.append(text)
         })
     }
 
@@ -43,10 +45,10 @@ class Heatmap {
             _x = i * this.spacing + this.weekWidth
 
             // 创建星期组元素
-            let weekGroup = this.createElement('g', {
+            let weekGroup = new Element('g', {
                 transform: `translate(${_x}, ${this.spacing})`
             })
-            this.svg.appendChild(weekGroup)
+            this.svg.append(weekGroup)
 
             // 创建每星期的日期元素
             // 先判断从星期几开始绘制
@@ -55,7 +57,7 @@ class Heatmap {
                 let dateFmt = this.format(date)
 
                 // 创建日期方块元素
-                let rect = this.createElement('rect', {
+                let rect = new Element('rect', {
                     x: 0, // 每个日期的 x 轴由所在的星期组 weekGroup 设置
                     y: j * this.spacing,
                     width: this.options.lattice.size,
@@ -63,34 +65,32 @@ class Heatmap {
                     onmouseover: 'this.style.opacity=1',
                     onmouseout: 'this.style.opacity=0.6',
                     'data-date': dateFmt,
+                    style: __merge(Heatmap.DEFAULT_STYLES.rect, {
+                        fill: this.options.lattice.color
+                    })
                 })
-                rect.styles(this.merge(Heatmap.DEFAULT_STYLES.rect, {
-                    fill: this.options.lattice.color
-                }))
 
                 // 创建日期的鼠标提示元素
-                let title = this.createElement('title')
-                title.innerHTML = dateFmt
+                let title = new Element('title')
+                title.setText(dateFmt)
 
                 // 如果该日期存在数据负载则重设样式、增加点击事件
                 let payload = this.options.data[dateFmt]
                 if (payload) {
-                    title.innerHTML += '\n' + payload.title
-                    rect.styles({
-                        fill: this.options.lattice.highlightColor,
-                        cursor: 'pointer'
+                    title.setText(title.text + '\n' + payload.title)
+                    rect.setClick('location.href=this.dataset.link')
+                    rect.setAttribute({
+                        'data-link': payload.url,
+                        style: {
+                            fill: this.options.lattice.highlightColor,
+                            cursor: 'pointer'
+                        }
                     })
-                    rect.attrs({
-                        'data-link': payload.url
-                    })
-                    rect.onclick = function() {
-                        location.href = this.dataset.link
-                    }
                 }
 
                 // 添加各元素
-                rect.appendChild(title)
-                weekGroup.appendChild(rect)
+                rect.append(title)
+                weekGroup.append(rect)
 
                 // 缓存月份的x轴供创建月份时使用
                 let month = date.getMonth()
@@ -112,28 +112,14 @@ class Heatmap {
     buildMonths(m, x) {
         const months = this.options.lang.months
         if (!Array.isArray(months)) {
-            throw new Error('`months` must be an array')
+            throw new Error('lang["months"] must be an array')
         }
-        let text = this.createElement('text', {
+        let text = new Element('text', {
             x: x,
             y: Heatmap.HEADER_HEIGHT
         })
-        text.innerHTML = months[m]
-        this.svg.appendChild(text)
-    }
-
-    createElement(tag, _attrs) {
-        let element = document.createElementNS('http://www.w3.org/2000/svg', tag);
-        element.attrs = function(attrs) {
-            for (let key in attrs) this.setAttribute(key, attrs[key])
-            return element
-        }
-        element.styles = function(styles) {
-            for (let key in styles) this.style[key] = styles[key]
-            return element
-        }
-        element.attrs(_attrs)
-        return element
+        text.setText(months[m])
+        this.svg.append(text)
     }
 
     format(date) {
@@ -142,22 +128,8 @@ class Heatmap {
         return date.getFullYear() + '/' + (m < 10 ? '0' + m : m) + '/' + (d < 10 ? '0' + d : d)
     }
 
-    merge(...objs) {
-        const result = {}
-        const isObject = o => {
-            return typeof o === 'object' && !o.length
-        }
-        objs.forEach(obj => {
-            for (let key in obj) {
-                const value = obj[key]
-                if (isObject(result[key]) && isObject(value)) {
-                    result[key] = this.merge(result[key], value)
-                } else {
-                    result[key] = value
-                }
-            }
-        })
-        return result
+    toSVG() {
+        return this.svg.toXml()
     }
 }
 
@@ -168,12 +140,12 @@ Heatmap.DEFAULT_OPTIONS = {
     lattice: {
         size: 12,
         spacing: 3,
-        color: '#ddd',
-        highlightColor: '#cd4230'
+        highlightColor: '#cd4230',
+        color: '#ddd'
     },
     lang: {
         days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     }
 }
 
@@ -186,4 +158,79 @@ Heatmap.DEFAULT_STYLES = {
         opacity: 0.6,
         transition: 'all .3s'
     }
+}
+
+/**
+ * 虚拟 DOM 元素类
+ * { tag, attrs, text, children }
+ */
+class Element {
+    constructor(tag, attrs = {}) {
+        this.tag = tag
+        this.attrs = attrs
+        this.children = []
+    }
+    append(element) {
+        this.children.push(element)
+    }
+    setText(text) {
+        this.text = text
+    }
+    setClick(fn) {
+        this.attrs.onclick = fn
+    }
+    setAttribute(attrs) {
+        this.attrs = __merge(this.attrs, attrs)
+    }
+    toXml() {
+        // 将 style 对象转换成 "a:1;b:2" 形式的字符串
+        if (this.attrs.style) {
+            const styles = []
+            for (let key in this.attrs.style) {
+                styles.push(`${key}:${this.attrs.style[key]}`)
+            }
+            this.attrs.style = styles.join(';')
+        }
+
+        // 将 atrrs 对象转换成 "a=1 b=2" 形式的字符串
+        let attrs = []
+        for (let key in this.attrs) {
+            attrs.push(` ${key}="${this.attrs[key]}"`)
+        }
+        attrs = attrs.join('')
+
+        // 元素开始标签
+        const xml = []
+        xml.push(`<${this.tag}${attrs}>`)
+
+        // 元素 innerHTML 或子元素
+        if (this.text) {
+            xml.push(this.text)
+        } else {
+            this.children.forEach(child => xml.push(child.toXml()))
+        }
+
+        // 元素结束标签
+        xml.push(`</${this.tag}>`)
+        return xml.join('')
+    }
+}
+
+function __merge(...objs) {
+    const result = {}
+    const isObject = o => {
+        return o && typeof o === 'object' && !o.length
+    }
+    objs.forEach(obj => {
+        for (let key in obj) {
+            const value = obj[key]
+            if (isObject(result[key]) && isObject(value)) {
+                result[key] = __merge(result[key], value)
+            } else
+            if (value) {
+                result[key] = value
+            }
+        }
+    })
+    return result
 }

@@ -1,9 +1,8 @@
-# Calendar Heatmap
-A super lightweight library for calendar heatmap.
+# Heatmap Calendar
+A super lightweight library for heatmap calendar.
 
-## Browser Version
 ```js
-const heatmap = new Heatmap('.container', {
+const heatmap = new Heatmap({
   data: {
     "2019/10/10": {
       "url": "https://github.com",
@@ -21,7 +20,6 @@ const heatmap = new Heatmap('.container', {
     highlightColor: '#cd4230'
   }
 })
-```
 
-## RESTful API Version
-https://heat.now.sh
+el.innerHTML = heatmap.toSVG()
+```

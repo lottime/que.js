@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Heatmap.js</title>
+  <style>
+  * { box-sizing: border-box; }
+  body { font-family: "Monaco", "Consolas", "Courier"; }
+  main { max-width: 800px; margin: 20px auto; text-align: center; }
+  button, textarea,pre { color: inherit; font-family: inherit; font-size: inherit; }
+  button { outline: 0; border: 0; cursor: pointer; border-radius: 3px; padding: 10px 40px; background: #cd4230; color:#fff; opacity: 0.8; transition: opacity .3s; }
+  button:active { opacity: 1; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  h3 { text-align: initial; }
+  pre { padding:20px; text-align: initial; background: #f6f6f6; overflow: auto; }
+  pre[contenteditable] { outline: 0; min-height: 100px; transition: background .3s; }
+  pre[contenteditable]:focus { background: #ffe793; }
+  </style>
+</head>
+<body>
+
+<main>
+  <h1>Simple Heatmap Calendar</h1>
+
+<h3>HTML</h3>
+<pre>
+&lt;div id="container"&gt;&lt;/div&gt;
+&lt;script src="heatmap.js">&lt;/script&gt;
+
+&lt;script&gt;
+  const heatmap = new Heatmap(options)
+  document.getElementById('container').innerHTML = heatmap.toSVG()
+&lt;/script&gt;
+</pre>
+
+<h3>Options (Editable)</h3>
+<pre contenteditable="plaintext-only">
+{
+  "data": {
+    "2020/10/10": {
+      "title": "Magic Animals of Parrot",
+      "url": "https://zerg.cc/magic-animals-of-parrot.html"
+    },
+    "2020/10/28": {
+      "title": "The Limit of Temperature",
+      "url": "https://zerg.cc/the-limit-of-temperature.html"
+    }
+  },
+  "lang": {
+    "months": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+    "days": ["日", "一", "二", "三", "四", "五", "六"]
+  },
+  "lattice": {
+    "size": 12,
+    "spacing": 3,
+    "highlightColor": "#cd4230",
+    "color": "#ddd"
+  }
+}
+</pre>
+
+  <p><button onclick="render()">RENDER</button></p>
+  <p id="container"></p>
+  <p>Source: <a href="https://github.com/seatwork/heatmap.js">https://github.com/seatwork/heatmap.js</a></p>
+</main>
+
+<script src="heatmap.js"></script>
+<script>
+const textarea = document.querySelector('pre[contenteditable]')
+const heatmap = document.getElementById('container')
+
+render()
+function render() {
+  const options = JSON.parse(textarea.textContent)
+  const heatmap = new Heatmap(options)
+  document.getElementById('container').innerHTML = heatmap.toSVG()
+}
+</script>
+</body>
+</html>
