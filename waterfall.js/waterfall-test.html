@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="waterfall.js/waterfall.js"></script>
+  <title>waterfall</title>
+</head>
+<body>
+
+<div class="grid">
+  <div><br>1</div>
+  <div><br><br>2</div>
+  <div><br><br><br><br>3</div>
+  <div><br>4</div>
+  <div><br><br><br>5</div>
+  <div><br>6</div>
+  <div><br><br>7</div>
+  <div><br><br><br><br><br><br>8</div>
+  <div><br><br><br><br>9</div>
+  <div><br><br><br><br><br>10</div>
+</div>
+
+<style>
+.grid>div { background: #eee; }
+</style>
+
+<script>
+const waterfall = new Waterfall('.grid')
+waterfall.render()
+window.onresize = () => waterfall.render()
+</script>
+</body>
+</html>
